@@ -1,6 +1,9 @@
 from enum import Enum
 
 
+# alchemist's role constants
+ALCHEMIST_ROLE = "Alchemists"
+
 # master's role constants
 MASTER_ROLE_POINTS_THRESHOLD = 50_000
 MASTER_ROLE = "Master Alchemist"

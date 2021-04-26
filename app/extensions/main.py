@@ -17,6 +17,7 @@ from app.constants import (
     APPRENTICE_ROLE_POINTS_THRESHOLD,
     USERNAME_COLUMN,
     POINTS_COLUMN,
+    ALCHEMIST_ROLE,
 )
 from app.models import Notification
 from app.constants import NotificationTypes
@@ -107,6 +108,7 @@ class MainCog(commands.Cog):
 
     async def assign_roles_based_on_points(self, member: discord.Member, points: int) -> None:
         # get roles objects
+        alchemist_role = discord.utils.get(self.guild.roles, name=ALCHEMIST_ROLE)
         apprentice_role = discord.utils.get(self.guild.roles, name=APPRENTICE_ROLE)
         valiant_role = discord.utils.get(self.guild.roles, name=VALIANT_ROLE)
         master_role = discord.utils.get(self.guild.roles, name=MASTER_ROLE)
@@ -120,19 +122,19 @@ class MainCog(commands.Cog):
         # assign roles
         if member_should_be_promoted_to_master:
             if not member_has_master_role:
-                await member.add_roles(master_role, reason="GSheet")
+                await member.add_roles(*[master_role, alchemist_role], reason="GSheet")
                 # remove apprentice and valiant roles
                 await member.remove_roles(*[apprentice_role, valiant_role], reason="Master role")
                 await self.notify(member=member, notification_type=NotificationTypes.GREET_MASTER)
         elif member_should_be_promoted_to_valiant:
             if not member_has_valiant_role:
-                await member.add_roles(valiant_role, reason="GSheet")
+                await member.add_roles(*[valiant_role, alchemist_role], reason="GSheet")
                 # remove apprentice and master roles
                 await member.remove_roles(*[apprentice_role, master_role], reason="Valiant role")
                 await self.notify(member=member, notification_type=NotificationTypes.GREET_VALIANT)
         elif member_should_be_promoted_to_apprentice:
             if not member_has_apprentice_role:
-                await member.add_roles(apprentice_role, reason="GSheet")
+                await member.add_roles(*[apprentice_role, alchemist_role], reason="GSheet")
                 # remove valiant and master roles
                 await member.remove_roles(*[valiant_role, master_role], reason="Apprentice role")
                 await self.notify(member=member, notification_type=NotificationTypes.GREET_APPRENTICE)

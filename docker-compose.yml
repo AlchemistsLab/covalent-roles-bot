@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
-  adminer:
-    image: adminer
-    ports:
-      - 8080:8080
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 8080:8080
