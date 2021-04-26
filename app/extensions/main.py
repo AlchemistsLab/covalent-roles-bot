@@ -58,7 +58,7 @@ class MainCog(commands.Cog):
             username = self.clean_username(data_item[USERNAME_COLUMN])
             points = data_item[POINTS_COLUMN]
             member = await self.get_member_or_none(username)
-            if member is not None:
+            if member is not None and isinstance(points, int):
                 await self.assign_roles_based_on_points(member=member, points=points)
 
     def clean_username(self, username: str) -> str:
@@ -73,7 +73,9 @@ class MainCog(commands.Cog):
         return username
 
     async def get_member_or_none(self, username: str) -> Optional[discord.Member]:
-        member = [_ for _ in self.guild.members if str(_) == username or str(_) == username.replace("@", "#")]
+        member = [
+            _ for _ in self.guild.members if str(_) == username or self.check_username_modifications(str(_), username)
+        ]
         if not member and "#" in username:
             logging.debug(f":::role_sheet: Could not find member '{username}'")
             return None
@@ -90,6 +92,18 @@ class MainCog(commands.Cog):
         else:
             member = member[0]
         return member
+
+    def check_username_modifications(self, discord_username: str, username: str) -> bool:
+        if discord_username == username.replace("@", "#"):
+            return True
+        # check modified username
+        if "#" in username:
+            name, tag = username.split("#")
+            return discord_username == f"{name} | Alchemist#{tag}"
+        else:
+            username = f"{username} | Alchemist"
+            return discord_username == f"{username} | Alchemist"
+        return False
 
     async def assign_roles_based_on_points(self, member: discord.Member, points: int) -> None:
         # get roles objects
