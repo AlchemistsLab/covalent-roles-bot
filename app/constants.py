@@ -18,7 +18,7 @@ APPRENTICE_ROLE_POINTS_THRESHOLD = 0
 
 
 # Google Sheets constants
-USERNAME_COLUMN = "Discord handle"
+USERNAME_COLUMN = "Discord name"
 POINTS_COLUMN = "Total CQT"
 
 
