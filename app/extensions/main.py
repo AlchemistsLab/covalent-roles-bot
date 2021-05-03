@@ -56,7 +56,7 @@ class MainCog(commands.Cog):
 
         # loop over tab data and check user points
         for data_item in tab_data:
-            username = self.clean_username(data_item[USERNAME_COLUMN])
+            username = self.clean_username(str(data_item[USERNAME_COLUMN]))
             points = data_item[POINTS_COLUMN]
             member = await self.get_member_or_none(username)
             if member is not None and isinstance(points, int):
