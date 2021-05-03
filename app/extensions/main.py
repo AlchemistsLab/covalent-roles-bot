@@ -150,11 +150,11 @@ class MainCog(commands.Cog):
         channel = self.guild.get_channel(config.WELCOME_CHANNEL_ID)
         notification_text = ""
         if notification_type == NotificationTypes.GREET_MASTER:
-            notification_text = f"Greetings, {member.mention} was promoted to Master Alchemist"
+            notification_text = f"Greatness is achieved with hard work and you {member.mention} have earned your role as **Master Alchemist**. The same vision that brought you here will inspire others and together you'll build a legacy!"  # noqa: E501
         elif notification_type == NotificationTypes.GREET_VALIANT:
-            notification_text = f"Greetings, {member.mention} was promoted to Valiant Alchemist"
+            notification_text = f"The path you've paved so far has opened up a new chapter for you {member.mention}. Embrace your new role as **Valiant Alchemist** and enjoy this new venture!"  # noqa: E501
         elif notification_type == NotificationTypes.GREET_APPRENTICE:
-            notification_text = f"Greetings, {member.mention} was promoted to Apprentice Alchemist"
+            notification_text = f"Only a few possess the skills of a true **Apprentice Alchemist** and you {member.mention} are one of them! Good luck on this new journey!"  # noqa: E501
         # prevent duplicate notifications
         _, created = await Notification.get_or_create(
             user_id=member.id,
