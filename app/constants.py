@@ -20,6 +20,7 @@ APPRENTICE_ROLE_POINTS_THRESHOLD = 0
 # Google Sheets constants
 USERNAME_COLUMN = "Discord name"
 POINTS_COLUMN = "Total CQT"
+TAB_NAME = "For bot"
 
 
 # notification types

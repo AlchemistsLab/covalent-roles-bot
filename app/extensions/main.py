@@ -3,6 +3,7 @@ import asyncio
 from typing import Optional
 
 import discord
+from sentry_sdk import capture_exception
 from discord.ext import commands, tasks
 
 import config
@@ -18,6 +19,7 @@ from app.constants import (
     USERNAME_COLUMN,
     POINTS_COLUMN,
     ALCHEMIST_ROLE,
+    TAB_NAME,
 )
 from app.models import Notification
 from app.constants import NotificationTypes
@@ -38,6 +40,9 @@ class MainCog(commands.Cog):
             await self.lock.acquire()
             try:
                 await self.do_periodic()
+            except Exception as e:
+                logging.debug(f":::role_sheet: {e}")
+                capture_exception(e)
             finally:
                 self.lock.release()
 
@@ -51,8 +56,7 @@ class MainCog(commands.Cog):
         google_sheets_data = await self.sheet.get_data()
 
         # parse users and points data
-        tab_name = next(iter(google_sheets_data))
-        tab_data = google_sheets_data[tab_name]
+        tab_data = google_sheets_data[TAB_NAME]
 
         # loop over tab data and check user points
         for data_item in tab_data:
@@ -122,22 +126,22 @@ class MainCog(commands.Cog):
         # assign roles
         if member_should_be_promoted_to_master:
             if not member_has_master_role:
+                await self.notify(member=member, notification_type=NotificationTypes.GREET_MASTER)
                 await member.add_roles(*[master_role, alchemist_role], reason="GSheet")
                 # remove apprentice and valiant roles
                 await member.remove_roles(*[apprentice_role, valiant_role], reason="Master role")
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_MASTER)
         elif member_should_be_promoted_to_valiant:
             if not member_has_valiant_role:
+                await self.notify(member=member, notification_type=NotificationTypes.GREET_VALIANT)
                 await member.add_roles(*[valiant_role, alchemist_role], reason="GSheet")
                 # remove apprentice and master roles
                 await member.remove_roles(*[apprentice_role, master_role], reason="Valiant role")
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_VALIANT)
         elif member_should_be_promoted_to_apprentice:
             if not member_has_apprentice_role:
+                await self.notify(member=member, notification_type=NotificationTypes.GREET_APPRENTICE)
                 await member.add_roles(*[apprentice_role, alchemist_role], reason="GSheet")
                 # remove valiant and master roles
                 await member.remove_roles(*[valiant_role, master_role], reason="Apprentice role")
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_APPRENTICE)
         return None
 
     async def log(self, msg: str) -> None:
