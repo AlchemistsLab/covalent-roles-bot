@@ -38,5 +38,6 @@ logging.basicConfig(
 if __name__ == "__main__":
     bot.load_extension("app.extensions.common")
     bot.load_extension("app.extensions.main")
+    bot.load_extension("app.extensions.notifications")
     bot.loop.run_until_complete(Tortoise.init(config=TORTOISE_ORM))
     bot.run(config.TOKEN)

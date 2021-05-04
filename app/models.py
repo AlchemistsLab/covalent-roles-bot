@@ -11,6 +11,7 @@ class Notification(Model):
     user_id = fields.BigIntField()
     channel_id = fields.BigIntField()
     text = fields.CharField(max_length=255)
+    is_sent = fields.BooleanField(default=True)
     notification_type = fields.CharEnumField(enum_type=NotificationTypes)
 
     created_at = fields.DatetimeField(auto_now_add=True)

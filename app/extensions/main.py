@@ -126,19 +126,19 @@ class MainCog(commands.Cog):
         # assign roles
         if member_should_be_promoted_to_master:
             if not member_has_master_role:
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_MASTER)
+                await self.schedule_notification(member=member, notification_type=NotificationTypes.GREET_MASTER)
                 await member.add_roles(*[master_role, alchemist_role], reason="GSheet")
                 # remove apprentice and valiant roles
                 await member.remove_roles(*[apprentice_role, valiant_role], reason="Master role")
         elif member_should_be_promoted_to_valiant:
             if not member_has_valiant_role:
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_VALIANT)
+                await self.schedule_notification(member=member, notification_type=NotificationTypes.GREET_VALIANT)
                 await member.add_roles(*[valiant_role, alchemist_role], reason="GSheet")
                 # remove apprentice and master roles
                 await member.remove_roles(*[apprentice_role, master_role], reason="Valiant role")
         elif member_should_be_promoted_to_apprentice:
             if not member_has_apprentice_role:
-                await self.notify(member=member, notification_type=NotificationTypes.GREET_APPRENTICE)
+                await self.schedule_notification(member=member, notification_type=NotificationTypes.GREET_APPRENTICE)
                 await member.add_roles(*[apprentice_role, alchemist_role], reason="GSheet")
                 # remove valiant and master roles
                 await member.remove_roles(*[valiant_role, master_role], reason="Apprentice role")
@@ -150,7 +150,7 @@ class MainCog(commands.Cog):
         if not await self.exists_message_in_channel(msg, channel):
             await channel.send(msg)
 
-    async def notify(self, member: discord.Member, notification_type: NotificationTypes) -> None:
+    async def schedule_notification(self, member: discord.Member, notification_type: NotificationTypes) -> None:
         channel = self.guild.get_channel(config.WELCOME_CHANNEL_ID)
         notification_text = ""
         if notification_type == NotificationTypes.GREET_MASTER:
@@ -160,14 +160,15 @@ class MainCog(commands.Cog):
         elif notification_type == NotificationTypes.GREET_APPRENTICE:
             notification_text = f"Only a few possess the skills of a true **Apprentice Alchemist** and you {member.mention} are one of them! Good luck on this new journey!"  # noqa: E501
         # prevent duplicate notifications
-        _, created = await Notification.get_or_create(
+        await Notification.get_or_create(
             user_id=member.id,
             notification_type=notification_type,
             channel_id=channel.id,
-            defaults={"text": notification_text},
+            defaults={
+                "text": notification_text,
+                "is_sent": not config.DO_SEND_NOTIFICATIONS,  # we will handle sending in separate cron task
+            },
         )
-        if created and config.DO_SEND_NOTIFICATIONS:
-            await channel.send(notification_text)
 
     async def exists_message_in_channel(self, msg: str, channel: discord.abc.GuildChannel) -> bool:
         """Searches for exact message, if it exists returns True"""

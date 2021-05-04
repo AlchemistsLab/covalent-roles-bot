@@ -8,6 +8,8 @@ LOG_CHANNEL_ID = 42424242
 WELCOME_CHANNEL_ID = 434343434
 # bot will check google sheets with this interval
 POLL_GOOGLE_SHEETS_SECONDS = 60
+# timeout between notifications in seconds
+TIMEOUT_BETWEEN_NOTIFICATIONS = 5 * 60
 # logging level
 LOG_LEVEL = "INFO"
 # should the bot log to file or to stdout
