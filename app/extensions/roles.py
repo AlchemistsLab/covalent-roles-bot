@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from typing import Optional
+from typing import Optional, List
 
 import discord
 from sentry_sdk import capture_exception
@@ -25,11 +25,12 @@ from app.models import Notification
 from app.constants import NotificationTypes
 
 
-class MainCog(commands.Cog):
+class RolesCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.lock = asyncio.Lock()
         self.guild: discord.Guild
+        self.members: List[discord.Member]
         self.sheet = SheetsHelper()
         self.google_sheets_poll_cron_task.start()
 
@@ -54,6 +55,8 @@ class MainCog(commands.Cog):
     async def do_periodic(self):
         await self.sheet.init()
         google_sheets_data = await self.sheet.get_data()
+        # refresh members
+        await self.fetch_all_members()
 
         # parse users and points data
         tab_data = google_sheets_data[TAB_NAME]
@@ -65,6 +68,12 @@ class MainCog(commands.Cog):
             member = await self.get_member_or_none(username)
             if member is not None and isinstance(points, int):
                 await self.assign_roles_based_on_points(member=member, points=points)
+
+    async def fetch_all_members(self) -> None:
+        """Get fresh list of up to date members"""
+        self.members = []
+        async for member in self.guild.fetch_members(limit=None):
+            self.members.append(member)
 
     def clean_username(self, username: str) -> str:
         if " #" in username:
@@ -78,14 +87,12 @@ class MainCog(commands.Cog):
         return username
 
     async def get_member_or_none(self, username: str) -> Optional[discord.Member]:
-        member = [
-            _ for _ in self.guild.members if str(_) == username or self.check_username_modifications(str(_), username)
-        ]
+        member = [_ for _ in self.members if str(_) == username or self.check_username_modifications(str(_), username)]
         if not member and "#" in username:
             logging.debug(f":::role_sheet: Could not find member '{username}'")
             return None
         elif not member and "#" not in username:
-            members = [_ for _ in self.guild.members if _.name == username]
+            members = [_ for _ in self.members if _.name == username]
             if not members:
                 logging.debug(f":::role_sheet: Could not find member '{username}'")
                 return None
@@ -180,4 +187,4 @@ class MainCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MainCog(bot))
+    bot.add_cog(RolesCog(bot))
