@@ -37,9 +37,9 @@ class RolesCog(commands.Cog):
     @tasks.loop(seconds=config.POLL_GOOGLE_SHEETS_SECONDS)
     async def google_sheets_poll_cron_task(self):
         # ensure that only one instance of job is running, other instances will be discarded
-        if not self.lock.locked():
-            await self.lock.acquire()
-            with Hub(Hub.current):
+        with Hub(Hub.current):
+            if not self.lock.locked():
+                await self.lock.acquire()
                 try:
                     await self.do_periodic()
                 except Exception as e:

@@ -21,9 +21,9 @@ class NotificationsCog(commands.Cog):
     @tasks.loop(seconds=120)
     async def notifications_cron_task(self):
         # ensure that only one instance of job is running, other instances will be discarded
-        if not self.lock.locked():
-            await self.lock.acquire()
-            with Hub(Hub.current):
+        with Hub(Hub.current):
+            if not self.lock.locked():
+                await self.lock.acquire()
                 try:
                     await self.do_periodic()
                 except Exception as e:
