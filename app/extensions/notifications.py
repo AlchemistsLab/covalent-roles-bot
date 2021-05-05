@@ -7,6 +7,7 @@ from discord.ext import commands, tasks
 
 import config
 from constants import GUILD_INDEX
+from app.constants import WELCOME_REACTION
 from app.models import Notification
 
 
@@ -39,9 +40,11 @@ class NotificationsCog(commands.Cog):
         notifications_to_send = await Notification.filter(is_sent=False)
         for notification in notifications_to_send:
             channel = self.guild.get_channel(notification.channel_id)
-            await channel.send(notification.text)
+            message = await channel.send(notification.text)
             notification.is_sent = True
             await notification.save(update_fields=["is_sent", "modified_at"])
+            # add reaction to message
+            await message.add_reaction(WELCOME_REACTION)
             await asyncio.sleep(config.TIMEOUT_BETWEEN_NOTIFICATIONS)
 
 

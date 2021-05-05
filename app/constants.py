@@ -28,3 +28,6 @@ class NotificationTypes(str, Enum):
     GREET_MASTER = "greet_master"
     GREET_VALIANT = "greet_valiant"
     GREET_APPRENTICE = "greet_apprentice"
+
+
+WELCOME_REACTION = "\U0001f973"  # :partying_face:
