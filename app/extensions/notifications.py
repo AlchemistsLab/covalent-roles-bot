@@ -2,7 +2,7 @@ import logging
 import asyncio
 
 import discord
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, Hub
 from discord.ext import commands, tasks
 
 import config
@@ -23,13 +23,14 @@ class NotificationsCog(commands.Cog):
         # ensure that only one instance of job is running, other instances will be discarded
         if not self.lock.locked():
             await self.lock.acquire()
-            try:
-                await self.do_periodic()
-            except Exception as e:
-                logging.debug(f":::role_sheet: {e}")
-                capture_exception(e)
-            finally:
-                self.lock.release()
+            with Hub(Hub.current):
+                try:
+                    await self.do_periodic()
+                except Exception as e:
+                    logging.debug(f":::role_sheet: {e}")
+                    capture_exception(e)
+                finally:
+                    self.lock.release()
 
     @notifications_cron_task.before_loop
     async def before_notifications_cron_task(self):

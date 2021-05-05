@@ -3,7 +3,7 @@ import asyncio
 from typing import Optional, List
 
 import discord
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, Hub
 from discord.ext import commands, tasks
 
 import config
@@ -39,13 +39,14 @@ class RolesCog(commands.Cog):
         # ensure that only one instance of job is running, other instances will be discarded
         if not self.lock.locked():
             await self.lock.acquire()
-            try:
-                await self.do_periodic()
-            except Exception as e:
-                logging.debug(f":::role_sheet: {e}")
-                capture_exception(e)
-            finally:
-                self.lock.release()
+            with Hub(Hub.current):
+                try:
+                    await self.do_periodic()
+                except Exception as e:
+                    logging.debug(f":::role_sheet: {e}")
+                    capture_exception(e)
+                finally:
+                    self.lock.release()
 
     @google_sheets_poll_cron_task.before_loop
     async def before_google_sheets_poll_cron_task(self):
@@ -86,8 +87,11 @@ class RolesCog(commands.Cog):
             username = username.replace("@ ", "@")
         return username
 
+    def get_username(self, member: discord.Member) -> str:
+        return f"{member.name}#{member.discriminator}"
+
     async def get_member_or_none(self, username: str) -> Optional[discord.Member]:
-        member = [_ for _ in self.members if str(_) == username or self.check_username_modifications(str(_), username)]
+        member = [_ for _ in self.members if self.check_username_modifications(self.get_username(_), username)]
         if not member and "#" in username:
             logging.debug(f":::role_sheet: Could not find member '{username}'")
             return None
@@ -106,6 +110,8 @@ class RolesCog(commands.Cog):
         return member
 
     def check_username_modifications(self, discord_username: str, username: str) -> bool:
+        if discord_username == username:
+            return True
         if discord_username == username.replace("@", "#"):
             return True
         # check modified username
