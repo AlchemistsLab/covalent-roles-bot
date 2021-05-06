@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import discord
 from sentry_sdk import capture_exception, Hub
@@ -65,7 +65,7 @@ class RolesCog(commands.Cog):
         # loop over tab data and check user points
         for data_item in tab_data:
             username = self.clean_username(str(data_item[USERNAME_COLUMN]))
-            points = data_item[POINTS_COLUMN]
+            points = self.clean_points(data_item[POINTS_COLUMN])
             member = await self.get_member_or_none(username)
             if member is not None and isinstance(points, int):
                 await self.assign_roles_based_on_points(member=member, points=points)
@@ -86,6 +86,12 @@ class RolesCog(commands.Cog):
         if "@ " in username:
             username = username.replace("@ ", "@")
         return username
+
+    def clean_points(self, points: Union[str, int]) -> int:
+        if isinstance(points, str):
+            points_no_comma = points.replace(",", "")
+            return int(points_no_comma)
+        return points
 
     def get_username(self, member: discord.Member) -> str:
         return f"{member.name}#{member.discriminator}"
