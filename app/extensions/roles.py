@@ -67,7 +67,7 @@ class RolesCog(commands.Cog):
             username = self.clean_username(str(data_item[USERNAME_COLUMN]))
             points = self.clean_points(data_item[POINTS_COLUMN])
             member = await self.get_member_or_none(username)
-            if member is not None and isinstance(points, int):
+            if member is not None:
                 await self.assign_roles_based_on_points(member=member, points=points)
 
     async def fetch_all_members(self) -> None:
@@ -88,10 +88,12 @@ class RolesCog(commands.Cog):
         return username
 
     def clean_points(self, points: Union[str, int]) -> int:
-        if isinstance(points, str):
+        if isinstance(points, str) and points:
             points_no_comma = points.replace(",", "")
             return int(points_no_comma)
-        return points
+        elif isinstance(points, str) and not points:
+            return 0
+        return int(points)
 
     def get_username(self, member: discord.Member) -> str:
         return f"{member.name}#{member.discriminator}"
