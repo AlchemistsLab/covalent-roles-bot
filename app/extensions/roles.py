@@ -118,6 +118,8 @@ class RolesCog(commands.Cog):
         return member
 
     def check_username_modifications(self, discord_username: str, username: str) -> bool:
+        # remove spaces at the beginning and at the end
+        username = username.strip()
         if discord_username == username:
             return True
         if discord_username == username.replace("@", "#"):
