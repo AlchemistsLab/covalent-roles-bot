@@ -85,15 +85,17 @@ class RolesCog(commands.Cog):
             username = username.replace(" @", "@")
         if "@ " in username:
             username = username.replace("@ ", "@")
+        # remove spaces at the beginning and at the end
+        username = username.strip()
         return username
 
     def clean_points(self, points: Union[str, int]) -> int:
         if isinstance(points, str) and points:
-            points_no_comma = points.replace(",", "")
-            return int(points_no_comma)
-        elif isinstance(points, str) and not points:
+            points = points.replace(",", "")
+        try:
+            return int(points)
+        except (ValueError, TypeError):
             return 0
-        return int(points)
 
     def get_username(self, member: discord.Member) -> str:
         return f"{member.name}#{member.discriminator}"
@@ -118,8 +120,6 @@ class RolesCog(commands.Cog):
         return member
 
     def check_username_modifications(self, discord_username: str, username: str) -> bool:
-        # remove spaces at the beginning and at the end
-        username = username.strip()
         if discord_username == username:
             return True
         if discord_username == username.replace("@", "#"):
