@@ -124,6 +124,8 @@ class RolesCog(commands.Cog):
             return True
         if discord_username == username.replace("@", "#"):
             return True
+        if discord_username.lower() == username.lower():
+            return True
         # check modified username
         if "#" in username:
             name, tag = username.split("#")
