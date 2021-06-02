@@ -9,7 +9,7 @@ MASTER_ROLE_POINTS_THRESHOLD = 50_000
 MASTER_ROLE = "Master Alchemist"
 
 # valiant's role constants
-VALIANT_ROLE_POINTS_THRESHOLD = 3_000
+VALIANT_ROLE_POINTS_THRESHOLD = 2_000
 VALIANT_ROLE = "Valiant Alchemist"
 
 # apprentice's role constants
