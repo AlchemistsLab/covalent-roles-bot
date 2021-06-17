@@ -5,22 +5,16 @@ from enum import Enum
 ALCHEMIST_ROLE = "Alchemists"
 
 # master's role constants
-MASTER_ROLE_POINTS_THRESHOLD = 50_000
+MASTER_ROLE_ID = 2
 MASTER_ROLE = "Master Alchemist"
 
 # valiant's role constants
-VALIANT_ROLE_POINTS_THRESHOLD = 2_000
+VALIANT_ROLE_ID = 3
 VALIANT_ROLE = "Valiant Alchemist"
 
 # apprentice's role constants
+APPRENTICE_ROLE_ID = 4
 APPRENTICE_ROLE = "Apprentice Alchemists"
-APPRENTICE_ROLE_POINTS_THRESHOLD = 0
-
-
-# Google Sheets constants
-USERNAME_COLUMN = "Discord name"
-POINTS_COLUMN = "Total CQT"
-TAB_NAME = "For bot"
 
 
 # notification types

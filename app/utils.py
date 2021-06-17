@@ -1,9 +1,6 @@
-import json
-
+import aiohttp
 import sentry_sdk
-import gspread_asyncio
 from discord.ext import commands
-from oauth2client.service_account import ServiceAccountCredentials
 
 import config
 
@@ -39,29 +36,25 @@ def use_sentry(client, **sentry_args):
             raise error
 
 
-class SheetsHelper:
-    def __init__(self):
-        with open("credentials.json") as f:
-            keys = json.load(f)
-
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-
-        def get_creds():
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(keys, scope)
-            return creds
-
-        self.gc = gspread_asyncio.AsyncioGspreadClientManager(get_creds)
-
-    async def init(self):
-        agc = await self.gc.authorize()
-        self.sh = await agc.open_by_key(config.GOOGLE_SHEETS_KEY)
-
-    async def get_data(self):
-        result = dict()
-
-        ws: gspread_asyncio.AsyncioGspreadWorksheet
-        for ws in await self.sh.worksheets():
-            sheet_name = ws.title
-            result[sheet_name] = await ws.get_all_records()
-
-        return result
+async def fetch_alchemists_data() -> list:
+    async with aiohttp.ClientSession() as session:
+        headers = {
+            "authority": "api.covalenthq.com",
+            "sec-ch-ua": '"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"',
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",  # noqa: E501
+            "sec-ch-ua-mobile": "?0",
+            "authorization": config.COVALENT_BEARER_TOKEN,
+            "accept": "*/*",
+            "origin": "https://www.covalenthq.com",
+            "sec-fetch-site": "same-site",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "https://www.covalenthq.com/",
+            "accept-language": "en-US,en;q=0.9,ru;q=0.8,es;q=0.7",
+        }
+        async with session.get(
+            "https://api.covalenthq.com/_/alchemist/alchemists/",
+            headers=headers,
+        ) as response:
+            response_json = await response.json()
+            return response_json["data"]["alchemists"]

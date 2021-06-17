@@ -4,6 +4,7 @@ import logging
 from discord import Intents, Activity, ActivityType
 from tortoise import Tortoise
 from discord.ext import commands
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
 import config
 from constants import SENTRY_ENV_NAME, TORTOISE_ORM
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     # initialize bot params
     intents = Intents.default()
     intents.members = True
-    activity = Activity(type=ActivityType.watching, name="Google Sheets")
+    activity = Activity(type=ActivityType.playing, name="Covalent Roles")
     bot = commands.Bot(command_prefix="!role.", help_command=None, intents=intents, activity=activity)
 
     # init sentry SDK
@@ -22,7 +23,7 @@ if __name__ == "__main__":
         bot,
         dsn=config.SENTRY_API_KEY,
         environment=SENTRY_ENV_NAME,
-        integrations=[],
+        integrations=[AioHttpIntegration()],
     )
 
     # setup logger
