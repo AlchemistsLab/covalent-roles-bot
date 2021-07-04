@@ -14,7 +14,7 @@ VALIANT_ROLE = "Valiant Alchemist"
 
 # apprentice's role constants
 APPRENTICE_ROLE_ID = 4
-APPRENTICE_ROLE = "Apprentice Alchemists"
+APPRENTICE_ROLE = "Apprentice Alchemist"
 
 
 # notification types
