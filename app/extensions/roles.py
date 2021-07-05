@@ -110,7 +110,7 @@ class RolesCog(commands.Cog):
         if discord_username.lower() == username.lower():
             return True
         # check modified username
-        if "#" in username:
+        if "#" in username and username.count("#") == 1:
             name, tag = username.split("#")
             return discord_username == f"{name} | Alchemist#{tag}"
         else:
